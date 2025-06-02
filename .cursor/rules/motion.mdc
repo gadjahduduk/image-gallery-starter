@@ -1,0 +1,1004 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+TITLE: Implementing Card Hover Effect with React and Framer Motion
+DESCRIPTION: This snippet defines a set of React components (`HoverEffect`, `Card`, `CardTitle`, `CardDescription`) to create an interactive grid of cards with a smooth hover animation. The `HoverEffect` component maps over an array of `items` to render individual cards, applying a `motion.span` for the background hover effect using `AnimatePresence` from Framer Motion. The `Card` components provide styling and structure for the content within each card.
+SOURCE: https://ui.aceternity.com/components/card-hover-effect
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
+ 
+import { useState } from "react";
+ 
+export const HoverEffect = ({
+  items,
+  className,
+}: {
+  items: {
+    title: string;
+    description: string;
+    link: string;
+  }[];
+  className?: string;
+}) => {
+  let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+ 
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  py-10",
+        className
+      )}
+    >
+      {items.map((item, idx) => (
+        <a
+          href={item?.link}
+          key={item?.link}
+          className="relative group  block p-2 h-full w-full"
+          onMouseEnter={() => setHoveredIndex(idx)}
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
+          <AnimatePresence>
+            {hoveredIndex === idx && (
+              <motion.span
+                className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block  rounded-3xl"
+                layoutId="hoverBackground"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  transition: { duration: 0.15 },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: { duration: 0.15, delay: 0.2 },
+                }}
+              />
+            )}
+          </AnimatePresence>
+          <Card>
+            <CardTitle>{item.title}</CardTitle>
+            <CardDescription>{item.description}</CardDescription>
+          </Card>
+        </a>
+      ))}
+    </div>
+  );
+};
+ 
+export const Card = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
+        className
+      )}
+    >
+      <div className="relative z-50">
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+export const CardTitle = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <h4 className={cn("text-zinc-100 font-bold tracking-wide mt-4", className)}>
+      {children}
+    </h4>
+  );
+};
+export const CardDescription = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <p
+      className={cn(
+        "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
+        className
+      )}
+    >
+      {children}
+    </p>
+  );
+};
+```
+
+----------------------------------------
+
+TITLE: Implementing Interactive Focus Cards in React
+DESCRIPTION: This snippet defines two React components: `Card` and `FocusCards`. The `Card` component displays an image and title, applying visual effects like blur and opacity based on hover state. The `FocusCards` component manages the hover state for a collection of `Card` components, rendering them in a responsive grid. It uses `useState` for state management and `React.memo` for performance optimization.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: TypeScript
+CODE:
+```
+"use client";
+ 
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+ 
+export const Card = React.memo(
+  ({
+    card,
+    index,
+    hovered,
+    setHovered,
+  }: {
+    card: any;
+    index: number;
+    hovered: number | null;
+    setHovered: React.Dispatch<React.SetStateAction<number | null>>;
+  }) => (
+    <div
+      onMouseEnter={() => setHovered(index)}
+      onMouseLeave={() => setHovered(null)}
+      className={cn(
+        "rounded-lg relative bg-gray-100 dark:bg-neutral-900 overflow-hidden h-60 md:h-96 w-full transition-all duration-300 ease-out",
+        hovered !== null && hovered !== index && "blur-sm scale-[0.98]"
+      )}
+    >
+      <img
+        src={card.src}
+        alt={card.title}
+        className="object-cover absolute inset-0"
+      />
+      <div
+        className={cn(
+          "absolute inset-0 bg-black/50 flex items-end py-8 px-4 transition-opacity duration-300",
+          hovered === index ? "opacity-100" : "opacity-0"
+        )}
+      >
+        <div className="text-xl md:text-2xl font-medium bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-200">
+          {card.title}
+        </div>
+      </div>
+    </div>
+  )
+);
+ 
+Card.displayName = "Card";
+ 
+type Card = {
+  title: string;
+  src: string;
+};
+ 
+export function FocusCards({ cards }: { cards: Card[] }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+ 
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto md:px-8 w-full">
+      {cards.map((card, index) => (
+        <Card
+          key={card.title}
+          card={card}
+          index={index}
+          hovered={hovered}
+          setHovered={setHovered}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+----------------------------------------
+
+TITLE: Implementing Focus Cards Component in React
+DESCRIPTION: This React component, `FocusCardsDemo`, demonstrates the usage of the `FocusCards` UI component. It initializes an array of `cards` objects, each containing a `title` and an image `src` URL. The component then renders the `FocusCards` component, passing the predefined `cards` array as a prop. This setup allows for a dynamic display of focusable cards with titles and images.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { FocusCards } from "@/components/ui/focus-cards";
+
+export function FocusCardsDemo() {
+  const cards = [
+    {
+      title: "Forest Adventure",
+      src: "https://images.unsplash.com/photo-1518710843675-2540dd79065c?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      title: "Valley of life",
+      src: "https://images.unsplash.com/photo-1600271772470-bd22a42787b3?q=80&w=3072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      title: "Sala behta hi jayega",
+      src: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=3070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      title: "Camping is for pros",
+      src: "https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      title: "The road not taken",
+      src: "https://images.unsplash.com/photo-1507041957456-9c397ce39c97?q=80&w=3456&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      title: "The First Rule",
+      src: "https://assets.aceternity.com/the-first-rule.png",
+    }
+  ];
+
+  return <FocusCards cards={cards} />;
+}
+```
+
+----------------------------------------
+
+TITLE: Implementing the CardStack React Component
+DESCRIPTION: This React component, `CardStack`, creates an interactive and animated display of stacked cards. It utilizes `useState` to manage the order of cards and `useEffect` to initiate an automatic flipping interval, moving the last card to the front every 5 seconds. The component integrates `motion/react` for smooth transitions, applying dynamic `top`, `scale`, and `zIndex` styles to create a depth effect based on each card's position in the stack. It accepts an array of `Card` objects, along with optional `offset` and `scaleFactor` props to customize the stacking appearance.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: TypeScript
+CODE:
+```
+"use client";
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+ 
+let interval: any;
+ 
+type Card = {
+  id: number;
+  name: string;
+  designation: string;
+  content: React.ReactNode;
+};
+ 
+export const CardStack = ({
+  items,
+  offset,
+  scaleFactor,
+}: {
+  items: Card[];
+  offset?: number;
+  scaleFactor?: number;
+}) => {
+  const CARD_OFFSET = offset || 10;
+  const SCALE_FACTOR = scaleFactor || 0.06;
+  const [cards, setCards] = useState<Card[]>(items);
+ 
+  useEffect(() => {
+    startFlipping();
+ 
+    return () => clearInterval(interval);
+  }, []);
+  const startFlipping = () => {
+    interval = setInterval(() => {
+      setCards((prevCards: Card[]) => {
+        const newArray = [...prevCards]; // create a copy of the array
+        newArray.unshift(newArray.pop()!); // move the last element to the front
+        return newArray;
+      });
+    }, 5000);
+  };
+ 
+  return (
+    <div className="relative  h-60 w-60 md:h-60 md:w-96">
+      {cards.map((card, index) => {
+        return (
+          <motion.div
+            key={card.id}
+            className="absolute dark:bg-black bg-white h-60 w-60 md:h-60 md:w-96 rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/[0.1]  shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between"
+            style={{
+              transformOrigin: "top center",
+            }}
+            animate={{
+              top: index * -CARD_OFFSET,
+              scale: 1 - index * SCALE_FACTOR, // decrease scale for cards that are behind
+              zIndex: cards.length - index //  decrease z-index for the cards that are behind
+            }}
+          >
+            <div className="font-normal text-neutral-700 dark:text-neutral-200">
+              {card.content}
+            </div>
+            <div>
+              <p className="text-neutral-500 font-medium dark:text-white">
+                {card.name}
+              </p>
+              <p className="text-neutral-400 font-normal dark:text-neutral-200">
+                {card.designation}
+              </p>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+```
+
+----------------------------------------
+
+TITLE: Implementing Auto-Flipping Card Stack in React TSX
+DESCRIPTION: This snippet defines the `CardStack` functional component in React using TypeScript and JSX. It manages a list of `Card` objects, automatically rotating them using `setInterval` within a `useEffect` hook. The component applies dynamic styling and animation via `motion.div` from `motion/react` to create a visually appealing card stack effect where cards appear to be layered and scale down as they move to the back.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: tsx
+CODE:
+```
+"use client";
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+
+let interval: any;
+
+type Card = {
+ id: number;
+ name: string;
+ designation: string;
+ content: React.ReactNode;
+};
+
+export const CardStack = ({
+ items,
+ offset,
+ scaleFactor,
+}: {
+ items: Card[];
+ offset?: number;
+ scaleFactor?: number;
+}) => {
+ const CARD_OFFSET = offset || 10;
+ const SCALE_FACTOR = scaleFactor || 0.06;
+ const [cards, setCards] = useState<Card[]>(items);
+
+ useEffect(() => {
+ startFlipping();
+
+ return () => clearInterval(interval);
+ }, []);
+ const startFlipping = () => {
+ interval = setInterval(() => {
+ setCards((prevCards: Card[]) => {
+ const newArray = [...prevCards]; // create a copy of the array
+ newArray.unshift(newArray.pop()!); // move the last element to the front
+ return newArray;
+ });
+ }, 5000);
+ };
+
+ return (
+ <div className="relative h-60 w-60 md:h-60 md:w-96">
+ {cards.map((card, index) => {
+ return (
+ <motion.div
+ key={card.id}
+ className="absolute dark:bg-black bg-white h-60 w-60 md:h-60 md:w-96 rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/[0.1] shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between"
+ style={{
+ transformOrigin: "top center",
+ }}
+ animate={{
+ top: index * -CARD_OFFSET,
+ scale: 1 - index * SCALE_FACTOR, // decrease scale for cards that are behind
+ zIndex: cards.length - index, // decrease z-index for the cards that are behind
+ }}
+ >
+ <div className="font-normal text-neutral-700 dark:text-neutral-200">
+ {card.content}
+ </div>
+ <div>
+ <p className="text-neutral-500 font-medium dark:text-white">
+ {card.name}
+ </p>
+ <p className="text-neutral-400 font-normal dark:text-neutral-200">
+ {card.designation}
+ </p>
+ </div>
+ </motion.div>
+ );
+ })}
+ </div>
+ );
+};
+
+```
+
+----------------------------------------
+
+TITLE: Implementing Card Hover Effect with React/Next.js
+DESCRIPTION: This snippet defines a React functional component `CardHoverEffectDemo` that renders a `HoverEffect` component. It depends on a local `card-hover-effect` UI component and a `projects` array containing data for each card. The component displays a list of company projects with titles, descriptions, and links, applying a hover effect to each.
+SOURCE: https://ui.aceternity.com/components/card-hover-effect
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { HoverEffect } from "../ui/card-hover-effect";
+
+export function CardHoverEffectDemo() {
+ return (
+ \u003cdiv className=\"max-w-5xl mx-auto px-8\"\u003e
+ \u003cHoverEffect items={projects} /\u003e
+ \u003c/div\u003e
+ );
+}
+export const projects = [
+ {
+ title: "Stripe",
+ description:
+ "A technology company that builds economic infrastructure for the internet.",
+ link: "https://stripe.com",
+ },
+ {
+ title: "Netflix",
+ description:
+ "A streaming service that offers a wide variety of award-winning TV shows, movies, anime, documentaries, and more on thousands of internet-connected devices.",
+ link: "https://netflix.com",
+ },
+ {
+ title: "Google",
+ description:
+ "A multinational technology company that specializes in Internet-related services and products.",
+ link: "https://google.com",
+ },
+ {
+ title: "Meta",
+ description:
+ "A technology company that focuses on building products that advance Facebook's mission of bringing the world closer together.",
+ link: "https://meta.com",
+ },
+ {
+ title: "Amazon",
+ description:
+ "A multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
+ link: "https://amazon.com",
+ },
+ {
+ title: "Microsoft",
+ description:
+ "A multinational technology company that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, personal computers, and related services.",
+ link: "https://microsoft.com",
+ },
+];
+```
+
+----------------------------------------
+
+TITLE: Implementing React CardStack Component with Animation
+DESCRIPTION: This snippet provides the full implementation of the `CardStack` React component. It uses `useState` to manage the order of cards and `useEffect` to set up an interval for automatically flipping cards. `motion/react` is used for smooth animations, applying `top`, `scale`, and `zIndex` transformations to create the stacking effect.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: TypeScript
+CODE:
+```
+"use client";\
+import { useEffect, useState } from \"react\";\
+import { motion } from \"motion/react\";\
+\
+let interval: any;\
+\
+type Card = {\
+ id: number;\
+ name: string;\
+ designation: string;\
+ content: React.ReactNode;\
+};\
+\
+export const CardStack = ({\
+ items,\
+ offset,\
+ scaleFactor,\
+}: {\
+ items: Card\[\];\
+ offset?: number;\
+ scaleFactor?: number;\
+}) =\> {\
+ const CARD\_OFFSET = offset || 10;\
+ const SCALE\_FACTOR = scaleFactor || 0.06;\
+ const \[cards, setCards\] = useState\<Card\[\]\>(items);\
+\
+ useEffect(() =\> {\
+ startFlipping();\
+\
+ return () =\> clearInterval(interval);\
+ }, \[\]);\
+ const startFlipping = () =\> {\
+ interval = setInterval(() =\> {\
+ setCards((prevCards: Card\[\]) =\> {\
+ const newArray = \[...prevCards\]; // create a copy of the array\
+ newArray.unshift(newArray.pop()!); // move the last element to the front\
+ return newArray;\
+ });\
+ }, 5000);\
+ };\
+\
+ return (\
+ \<div className=\"relative h-60 w-60 md:h-60 md:w-96\"\>\
+ {cards.map((card, index) =\> {\
+ return (\
+ \<motion.div\
+ key={card.id}\
+ className=\"absolute dark:bg-black bg-white h-60 w-60 md:h-60 md:w-96 rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/\[0.1\] shadow-black/\[0.1\] dark:shadow-white/\[0.05\] flex flex-col justify-between\"\
+ style={{\
+ transformOrigin: \"top center\",\
+ }}\
+ animate={{\
+ top: index \* -CARD\_OFFSET,\
+ scale: 1 - index \* SCALE\_FACTOR, // decrease scale for cards that are behind\
+ zIndex: cards.length - index // decrease z-index for the cards that are behind\
+ }}\
+ \>\
+ \<div className=\"font-normal text-neutral-700 dark:text-neutral-200\"\>\
+ {card.content}\
+ \</div\>\
+ \<div\>\
+ \<p className=\"text-neutral-500 font-medium dark:text-white\"\>\
+ {card.name}\
+ \</p\>\
+ \<p className=\"text-neutral-400 font-normal dark:text-neutral-200\"\>\
+ {card.designation}\
+ \</p\>\
+ \</div\>\
+ \</motion.div\>\
+ );\
+ })}\
+ \</div\>\
+ );\
+};\
+
+```
+
+----------------------------------------
+
+TITLE: CardStack Component Data Structures and Props
+DESCRIPTION: This snippet defines the `Card` type, which specifies the structure of individual card objects used within the `CardStack` component. It also outlines the properties accepted by the `CardStack` component itself, including the array of cards, and optional numeric parameters for customizing the visual stacking effect (offset and scale factor).
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: TypeScript
+CODE:
+```
+type Card = {\
+  id: number;\
+  name: string;\
+  designation: string;\
+  content: React.ReactNode;\
+};\
+\
+interface CardStackProps {\
+  items: Card[];\
+  offset?: number;\
+  scaleFactor?: number;\
+}
+```
+
+----------------------------------------
+
+TITLE: Initializing Theme Toggle Functionality (JavaScript)
+DESCRIPTION: This JavaScript snippet defines an immediately invoked function expression (IIFE) that handles theme switching based on local storage or system preferences. It removes existing 'light' or 'dark' classes, checks for a stored theme, applies the system theme if 'system' is set or no theme is found, and then adds the appropriate class to the document's `documentElement`.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: JavaScript
+CODE:
+```
+!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){d.style.colorScheme = 'dark';c.add('dark')}else{d.style.colorScheme = 'light';c.add('light')}}else if(e){c.add(e|| '')}if(e==='light'||e==='dark')d.style.colorScheme=e}catch(e){}}()
+```
+
+----------------------------------------
+
+TITLE: Applying Base Styles for Next.js Error Page (CSS)
+DESCRIPTION: This CSS snippet provides foundational styling for a Next.js 404 'Not Found' error page. It defines default text and background colors for the body and a right border for the 'next-error-h1' element. Additionally, it includes a media query to adapt these styles for users preferring a dark color scheme, ensuring a consistent visual experience across themes.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: CSS
+CODE:
+```
+body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}
+```
+
+----------------------------------------
+
+TITLE: Balancing Text Wrap Utility JavaScript
+DESCRIPTION: This JavaScript utility function, `self.__wrap_b`, attempts to balance text wrapping within an element. It dynamically adjusts the `max-width` of a target element based on its parent's dimensions to achieve a more balanced text layout, especially for headlines. It also includes a `ResizeObserver` to re-evaluate wrapping on parent resize.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: JavaScript
+CODE:
+```
+self.__wrap_n=self.__wrap_n||(self.CSS&&CSS.supports("text-wrap","balance")?1:2);self.__wrap_b=(e,t,r)=>{let n=null==(r=r||document.querySelector(`[data-br="${e}"]`))?void 0:r.parentElement;if(!n)return;let o=e=>r.style.maxWidth=e+"px";r.style.maxWidth="";let s=n.clientWidth,i=n.clientHeight,l=s/2-.25,a=s+.5,u;if(s){for(o(l),l=Math.max(r.scrollWidth,l);l+1<a;)o(u=Math.round((l+a)/2)),n.clientHeight===i?a=u:l=u;o(a*t+s*(1-t))}r.__wrap_o||"undefined"!=typeof ResizeObserver&&(r.__wrap_o=new ResizeObserver(()=>{self.__wrap_b(0,+r.dataset.brr,r)})).observe(n)};self.__wrap_n!=1&&self.__wrap_b("«R4jrlqspb»",1)
+```
+
+----------------------------------------
+
+TITLE: Implementing Text Wrapping Utility (JavaScript)
+DESCRIPTION: This JavaScript utility, likely for text balancing or wrapping, dynamically adjusts the `maxWidth` of an element to fit its content within a parent container. It uses a binary search-like approach to find the optimal width and includes a `ResizeObserver` to re-evaluate the layout on parent element resizing. The function `self.__wrap_b` takes an element identifier, a ratio, and an optional element reference.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: JavaScript
+CODE:
+```
+self.__wrap_n=self.__wrap_n||(self.CSS&&CSS.supports("text-wrap","balance")?1:2);self.__wrap_b=(e,t,r)=>{let n=null==(r=r||document.querySelector(`[data-br="${e}"]`))?void 0:r.parentElement;if(!n)return;let o=e=>r.style.maxWidth=e+"px";r.style.maxWidth="";let s=n.clientWidth,i=n.clientHeight,l=s/2-.25,a=s+.5,u;if(s){for(o(l),l=Math.max(r.scrollWidth,l);l+1<a;)o(u=Math.round((l+a)/2)),n.clientHeight===i?a=u:l=u;o(a*t+s*(1-t))}r.__wrap_o||"undefined"!=typeof ResizeObserver&&(r.__wrap_o=new ResizeObserver(()=>{self.__wrap_b(0,+r.dataset.brr,r)})).observe(n)};self.__wrap_n!=1&&self.__wrap_b("«R4jrlqspb»",1)
+```
+
+----------------------------------------
+
+TITLE: Hiding Scrollbar for Radix Scroll Area CSS
+DESCRIPTION: This CSS snippet hides the scrollbar for elements with the `data-radix-scroll-area-viewport` attribute. It uses `scrollbar-width: none` for Firefox, `-ms-overflow-style: none` for IE/Edge, and `-webkit-overflow-scrolling: touch` along with `::-webkit-scrollbar { display: none }` for WebKit browsers (Chrome, Safari).
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: CSS
+CODE:
+```
+[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+```
+
+----------------------------------------
+
+TITLE: Implementing BackgroundGradientDemo Component in React
+DESCRIPTION: This React component, `BackgroundGradientDemo`, renders a product card featuring an image, title, description, and a 'Buy now' button, all encapsulated within a `BackgroundGradient` component for a dynamic visual effect. It relies on `BackgroundGradient` for the animated background and imports `@tabler/icons-react`, though `IconAppWindow` is not directly used in the provided snippet.
+SOURCE: https://ui.aceternity.com/components/background-gradient
+
+LANGUAGE: JavaScript
+CODE:
+```
+"use client";\
+import React from \"react\";\
+import { BackgroundGradient } from \"../ui/background-gradient\";\
+import { IconAppWindow } from \"@tabler/icons-react\";\
+\
+\
+export function BackgroundGradientDemo() {\
+ return (\
+ <div>\
+ <BackgroundGradient className=\"rounded-[22px] max-w-sm p-4 sm:p-10 bg-white dark:bg-zinc-900\">\
+ <img\
+ src={`/jordans.webp`}\
+ alt=\"jordans\"\
+ height=\"400\"\
+ width=\"400\"\
+ className=\"object-contain\"\
+ />\
+ <p className=\"text-base sm:text-xl text-black mt-4 mb-2 dark:text-neutral-200\">\
+ Air Jordan 4 Retro Reimagined\
+ </p>\
+\
+ <p className=\"text-sm text-neutral-600 dark:text-neutral-400\">\
+ The Air Jordan 4 Retro Reimagined Bred will release on Saturday,\
+ February 17, 2024. Your best opportunity to get these right now is by\
+ entering raffles and waiting for the official releases.\
+ </p>\
+ <button className=\"rounded-full pl-4 pr-1 py-1 text-white flex items-center space-x-1 bg-black mt-4 text-xs font-bold dark:bg-zinc-800\">\
+ <span>Buy now </span>\
+ <span className=\"bg-zinc-700 rounded-full text-[0.6rem] px-2 py-0 text-white\">\
+ $100\
+ </span>\
+ </button>\
+ </BackgroundGradient>\
+ </div>\
+ );\
+}
+```
+
+----------------------------------------
+
+TITLE: Initializing Theme Management JavaScript
+DESCRIPTION: This self-executing JavaScript function manages the website's theme (light/dark) based on `localStorage` or system preferences. It removes existing theme classes, checks for a stored theme, and applies 'dark' or 'light' based on user preference or the system's color scheme setting. It also sets the `colorScheme` CSS property on the document element.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: JavaScript
+CODE:
+```
+!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){d.style.colorScheme = 'dark';c.add('dark')}else{d.style.colorScheme = 'light';c.add('light')}}else if(e){c.add(e|| '')}if(e==='light'||e==='dark')d.style.colorScheme=e}catch(e){}}()
+```
+
+----------------------------------------
+
+TITLE: Implementing an Interactive Wobble Card Component in React/TypeScript
+DESCRIPTION: This React component, `WobbleCard`, creates a dynamic UI element that reacts to mouse movement with a subtle 'wobble' effect. It uses `useState` to track hover state and mouse position, applying `translate3d` transformations via `motion/react` for smooth parallax. The component accepts `children` for content and `containerClassName`/`className` for styling. It also includes a `Noise` sub-component for background texture.
+SOURCE: https://ui.aceternity.com/components/wobble-card
+
+LANGUAGE: tsx
+CODE:
+```
+"use client";
+import React, { useState } from "react";
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
+ 
+export const WobbleCard = ({
+  children,
+  containerClassName,
+  className,
+}: {
+  children: React.ReactNode;
+  containerClassName?: string;
+  className?: string;
+}) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+ 
+  const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    const { clientX, clientY } = event;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (clientX - (rect.left + rect.width / 2)) / 20;
+    const y = (clientY - (rect.top + rect.height / 2)) / 20;
+    setMousePosition({ x, y });
+  };
+  return (
+    <motion.section
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setMousePosition({ x: 0, y: 0 });
+      }}
+      style={{
+        transform: isHovering
+          ? `translate3d(${mousePosition.x}px, ${mousePosition.y}px, 0) scale3d(1, 1, 1)`
+          : "translate3d(0px, 0px, 0) scale3d(1, 1, 1)",
+        transition: "transform 0.1s ease-out",
+      }}
+      className={cn(
+        "mx-auto w-full bg-indigo-800  relative rounded-2xl overflow-hidden",
+        containerClassName
+      )}
+    >
+      <div
+        className="relative  h-full [background-image:radial-gradient(88%_100%_at_top,rgba(255,255,255,0.5),rgba(255,255,255,0))]  sm:mx-0 sm:rounded-2xl overflow-hidden"
+        style={{
+          boxShadow:
+            "0 10px 32px rgba(34, 42, 53, 0.12), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.05), 0 4px 6px rgba(34, 42, 53, 0.08), 0 24px 108px rgba(47, 48, 55, 0.10)",
+        }}
+      >
+        <motion.div
+          style={{
+            transform: isHovering
+              ? `translate3d(${-mousePosition.x}px, ${-mousePosition.y}px, 0) scale3d(1.03, 1.03, 1)`
+              : "translate3d(0px, 0px, 0) scale3d(1, 1, 1)",
+            transition: "transform 0.1s ease-out",
+          }}
+          className={cn("h-full px-4 py-20 sm:px-10", className)}
+        >
+          <Noise />
+          {children}
+        </motion.div>
+      </div>
+    </motion.section>
+  );
+};
+ 
+const Noise = () => {
+  return (
+    <div
+      className="absolute inset-0 w-full h-full scale-[1.2] transform opacity-10 [mask-image:radial-gradient(#fff,transparent,75%)]"
+      style={{
+        backgroundImage: "url(/noise.webp)",
+        backgroundSize: "30%",
+      }}
+    ></div>
+  );
+};
+```
+
+----------------------------------------
+
+TITLE: Installing Project Dependencies (npm)
+DESCRIPTION: This command installs the necessary npm packages for the project. It includes `motion` for animations, `clsx` for conditionally joining class names, `tailwind-merge` for merging Tailwind CSS classes without conflicts, and `@tabler/icons-react` for React icon components. These dependencies are crucial for the UI components to function correctly.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: Bash
+CODE:
+```
+npm i motion clsx tailwind-merge @tabler/icons-react
+```
+
+----------------------------------------
+
+TITLE: Initializing Intercom Chat Widget Settings
+DESCRIPTION: This JavaScript snippet defines the global `window.intercomSettings` object, which is essential for configuring the Intercom chat widget. It sets the `api_base` URL and the `app_id`, enabling the Intercom service to connect and function correctly within the application.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: JavaScript
+CODE:
+```
+\n window.intercomSettings = {\n api_base: \"https://api-iam.intercom.io\",\n app_id: \"duup7948\"\n };\n 
+```
+
+----------------------------------------
+
+TITLE: Creating a Class Name Utility Function (TypeScript/JavaScript)
+DESCRIPTION: This utility function, `cn`, combines multiple class values using `clsx` and resolves Tailwind CSS conflicts with `twMerge`. It's designed to simplify dynamic class name generation in React components, ensuring correct styling precedence and avoiding class duplication issues.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+```
+
+----------------------------------------
+
+TITLE: React `HoverEffect` Component in TypeScript
+DESCRIPTION: The `HoverEffect` is a React functional component written in TypeScript that renders a grid of interactive items with a dynamic hover effect. It leverages `motion/react` for smooth animations and `useState` to manage the hover state, accepting an array of `items` (each with `title`, `description`, `link`) and an optional `className` for customization. This component is designed for creating engaging UI elements like cards or links.
+SOURCE: https://ui.aceternity.com/components/card-hover-effect
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
+
+import { useState } from "react";
+
+export const HoverEffect = ({
+ items,
+ className,
+}: {
+ items: {
+ title: string;
+ description: string;
+ link: string;
+ }[];
+ className?: string;
+}) => {
+ let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+ return (
+ <div
+ className={cn(
+ "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 py-10",
+ className
+ )}
+ >
+ {items.map((item, idx) => (
+ <a
+ href={item?.link}
+ key={item?.link}
+ className="relative group block p-2 h-full w-full"
+ onMouseEnter={() => setHoveredIndex(idx)}
+ onMouseLeave={() => setHoveredIndex(null)}
+ >
+ 
+```
+
+----------------------------------------
+
+TITLE: Defining a Class Name Utility Function
+DESCRIPTION: This snippet defines the `cn` function, which takes an array of class inputs. It uses `clsx` to intelligently combine class names and `tailwind-merge` to resolve any conflicting Tailwind CSS utility classes, returning a single, optimized class string. This is crucial for dynamic styling in UI components.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+LANGUAGE: JavaScript
+CODE:
+```
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs) {
+  return twMerge(clsx(inputs
+```
+
+----------------------------------------
+
+TITLE: Disabling Scrollbar for Radix Scroll Area (CSS)
+DESCRIPTION: This CSS snippet targets elements with the `data-radix-scroll-area-viewport` attribute to hide their scrollbars across different browsers. It sets `scrollbar-width` to `none` for Firefox, `-ms-overflow-style` to `none` for Internet Explorer/Edge, and `display:none` for WebKit-based browsers (Chrome, Safari) via the `::-webkit-scrollbar` pseudo-element.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: CSS
+CODE:
+```
+[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+```
+
+----------------------------------------
+
+TITLE: Initializing Intercom Chat Widget (JavaScript)
+DESCRIPTION: This JavaScript snippet initializes the global 'window.intercomSettings' object, which is essential for configuring the Intercom chat widget. It specifies the 'api_base' URL and the unique 'app_id' required for the Intercom application to function correctly. This code is typically injected directly into the DOM using 'dangerouslySetInnerHTML' within a React component.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: JavaScript
+CODE:
+```
+\n window.intercomSettings = {\n api_base: \"https://api-iam.intercom.io\",\n app_id: \"duup7948\"\n };\n
+```
+
+----------------------------------------
+
+TITLE: Installing Core Dependencies NPM
+DESCRIPTION: This command installs the necessary npm packages for the Aceternity UI components: `framer-motion` (for animations), `clsx` (for conditionally joining class names), and `tailwind-merge` (for merging Tailwind CSS classes without conflicts). These are essential for the component's functionality and styling.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: Shell
+CODE:
+```
+npm i motion clsx tailwind-merge
+```
+
+----------------------------------------
+
+TITLE: Defining `cn` Utility for Class Merging (TypeScript)
+DESCRIPTION: This TypeScript utility function, `cn`, combines `clsx` and `tailwind-merge` to create a robust class name helper. `clsx` allows for conditional class application, while `tailwind-merge` resolves conflicting Tailwind CSS classes by ensuring the last defined class takes precedence. This function is essential for building dynamic and maintainable UI components with Tailwind CSS.
+SOURCE: https://ui.aceternity.com/components/focus-cards
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+ 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+----------------------------------------
+
+TITLE: Defining Class Name Utility Function TypeScript
+DESCRIPTION: This TypeScript utility function, `cn`, combines `clsx` and `tailwind-merge` to create a robust class name helper. It allows for conditional class application and intelligently merges Tailwind CSS classes, preventing conflicts and ensuring correct styling. This function is commonly used in React/Next.js projects for managing component styles.
+SOURCE: https://ui.aceternity.com/components/card-stack
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+ 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+----------------------------------------
+
+TITLE: Rendering AnimatedTooltip Component in React (JSX)
+DESCRIPTION: This snippet demonstrates how to render the `AnimatedTooltip` component within a React application. It shows the component being placed inside a flex container, passing a `people` array as the `items` prop. This setup is typical for displaying a list of items with interactive tooltips.
+SOURCE: https://ui.aceternity.com/components/animated-tooltip
+
+LANGUAGE: jsx
+CODE:
+```
+return (
+  <div className="flex flex-row items-center justify-center mb-10 w-full">
+    <AnimatedTooltip items={people} />
+  </div>
+);
+}
+
+```
