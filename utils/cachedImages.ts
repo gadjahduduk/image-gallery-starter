@@ -1,17 +1,14 @@
-import cloudinary from "./cloudinary";
+// Mock image data for gallery
+const mockImageData = {
+  resources: Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    height: "480",
+    width: "720", 
+    public_id: `image-${i}`,
+    format: 'jpg'
+  }))
+};
 
-let cachedResults;
-
-export default async function getResults() {
-  if (!cachedResults) {
-    const fetchedResults = await cloudinary.v2.search
-      .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
-      .sort_by("public_id", "desc")
-      .max_results(400)
-      .execute();
-
-    cachedResults = fetchedResults;
-  }
-
-  return cachedResults;
+export default function getResults() {
+  return Promise.resolve(mockImageData);
 }

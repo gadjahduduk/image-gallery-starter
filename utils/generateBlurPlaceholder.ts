@@ -1,25 +1,12 @@
-import imagemin from "imagemin";
-import imageminJpegtran from "imagemin-jpegtran";
 import type { ImageProps } from "./types";
 
-const cache = new Map<ImageProps, string>();
-
-export default async function getBase64ImageUrl(
-  image: ImageProps,
-): Promise<string> {
-  let url = cache.get(image);
-  if (url) {
-    return url;
-  }
-  const response = await fetch(
-    `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_jpg,w_8,q_70/${image.public_id}.${image.format}`,
-  );
-  const buffer = await response.arrayBuffer();
-  const minified = await imagemin.buffer(Buffer.from(buffer), {
-    plugins: [imageminJpegtran()],
-  });
-
-  url = `data:image/jpeg;base64,${Buffer.from(minified).toString("base64")}`;
-  cache.set(image, url);
-  return url;
+export default function getBase64ImageUrl(image: ImageProps): string {
+  // Simple gray SVG blur placeholder
+  const svg = `
+    <svg width="720" height="480" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f3f4f6"/>
+    </svg>
+  `;
+  
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }
